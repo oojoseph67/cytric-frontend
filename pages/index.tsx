@@ -20,15 +20,6 @@ import { motion } from "framer-motion";
 import NFTForm from "@/modules/components/NFTForm";
 import NFTGallery from "@/modules/components/NFTGallery";
 
-interface NFTGallery {
-  _id: string;
-  nftDescription: string;
-  nftId: number;
-  nftLogoUrl: string;
-  nftName: string;
-  userWallet: string;
-}
-
 export default function Home() {
   // const [name, setName] = useState("Cool NFT Image");
   // const [description, setDescription] = useState("Cool NFT Image for Cytric");
@@ -42,12 +33,7 @@ export default function Home() {
     imageUrl: string;
   } | null>(null);
 
-  const [userNFTs, setUserNFTs] = useState<NFTGallery[]>();
   const [tryCatchError, setTryCatchError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [fetchError, setFetchError] = useState<string>("");
-
-  console.log({ userNFTs });
 
   const [generatedId, setGenerateId] = useState<number>(
     Math.floor(Math.random() * 100000) + 1
@@ -84,31 +70,6 @@ export default function Home() {
   useEffect(() => {
     refetch();
   }, [generatedId]);
-
-  useEffect(() => {
-    const fetchUserNFTs = async () => {
-      if (!walletAddress) return;
-
-      setIsLoading(true);
-      setFetchError("");
-
-      try {
-        const nftsResponse = await axios.get(
-          `${BACKEND_URL}/nfts/findByWallet?userWallet=${walletAddress.toLowerCase()}`
-        );
-        setUserNFTs(nftsResponse.data as NFTGallery[]);
-      } catch (error) {
-        setFetchError(
-          error instanceof Error ? error.message : "Failed to fetch NFTs"
-        );
-        setUserNFTs([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchUserNFTs();
-  }, [walletAddress, isConfirmed]);
 
   const mintNFT = async () => {
     // step 1
@@ -162,7 +123,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>NFT Minting Platform</title>
+        <title>Joseph Cytric NFT Minting Platform</title>
         <meta name="description" content="Mint your unique NFTs" />
       </Head>
       <main className="min-h-screen bg-[#0A0B0F] text-white">
@@ -233,7 +194,7 @@ export default function Home() {
               </div>
             </motion.div>
 
-            <div id="mint-form">
+            <div id="mint-form" className="p-6">
               <NFTForm onSuccess={(nft) => setMintedNFT(nft)} />
             </div>
 

@@ -139,14 +139,6 @@ export default function NFTForm({ onSuccess }: NFTFormProps) {
         functionName: "mint",
         args: [BigInt(generatedId), metadataUrl],
       });
-
-      // Wait for transaction confirmation
-      // if (isConfirmed) {
-      //   // step 4: update UI only after confirmation
-      //   setMintedNFT(formData);
-      //   setIsSuccess(true);
-      //   onSuccess(formData);
-      // }
     } catch (error: any) {
       setError(
         error.response?.data?.message || "Failed to mint NFT. Please try again."
@@ -185,7 +177,6 @@ export default function NFTForm({ onSuccess }: NFTFormProps) {
 
   const isCompleteLoading = isLoading || isConfirming || isPending;
 
-  // Show different loading states based on the stage
   const getMintButtonText = () => {
     if (isPending) return "Confirm in Wallet...";
     if (isConfirming) return "Confirming Transaction...";
@@ -340,7 +331,7 @@ export default function NFTForm({ onSuccess }: NFTFormProps) {
         </div>
         <button
           type="submit"
-          disabled={isCompleteLoading}
+          disabled={isCompleteLoading || !walletAddress}
           className={`w-full bg-gradient-to-r from-[#E559E5] to-[#7C3AED] py-4 rounded-xl text-white font-medium flex items-center justify-center gap-2 hover:opacity-90 transition-opacity ${
             isCompleteLoading ? "opacity-50 cursor-not-allowed" : ""
           }`}
@@ -369,8 +360,10 @@ export default function NFTForm({ onSuccess }: NFTFormProps) {
               </svg>
               {getMintButtonText()}
             </>
-          ) : (
+          ) : walletAddress ? (
             "Mint NFT"
+          ) : (
+            "Connect Wallet"
           )}
         </button>
       </form>

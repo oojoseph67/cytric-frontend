@@ -15,6 +15,15 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { BACKEND_URL } from "@/utils/config/index.config";
 
+interface NFTGallery {
+  _id: string;
+  nftDescription: string;
+  nftId: number;
+  nftLogoUrl: string;
+  nftName: string;
+  userWallet: string;
+}
+
 export default function Home() {
   const [name, setName] = useState("Cool NFT Image");
   const [description, setDescription] = useState("Cool NFT Image for Cytric");
@@ -22,15 +31,17 @@ export default function Home() {
     "https://images.app.goo.gl/98dgUoyEywAhPk7X7"
   );
 
+  const [userNFTs, setUserNFTs] = useState<NFTGallery[]>();
+  const [tryCatchError, setTryCatchError] = useState("");
+
+  console.log({ userNFTs });
+
   const [generatedId, setGenerateId] = useState<number>(
     Math.floor(Math.random() * 100000) + 1
   );
 
-  console.log({ name, description, imageUrl, generatedId });
-
   const account = useAccount();
   const walletAddress = account.address;
-  console.log({ account });
 
   const nftMintingContract = getContractConfig(NFT_CONTRACT_ADDRESS, NFT_ABI);
 
@@ -40,21 +51,11 @@ export default function Home() {
     writeContract,
     error: mintError,
   } = useWriteContract();
+
   const { isLoading: isConfirming, isSuccess: isConfirmed } =
     useWaitForTransactionReceipt({
       hash,
     });
-
-  console.log({ hash, isPending });
-
-  const { data: balance, error: balanceError } = useReadContract({
-    address: nftMintingContract.address,
-    abi: nftMintingContract.abi,
-    functionName: "balanceOf",
-    args: ["0x8e0474682D32EfC6304C5DF2d94DbEd82e011973"],
-  });
-
-  console.log({ balance, balanceError });
 
   const {
     data: checkId,
@@ -71,54 +72,64 @@ export default function Home() {
     refetch();
   }, [generatedId]);
 
-  console.log({ checkId, error });
+  useEffect(() => {
+    const fetchUserNFTs = async () => {
+      const nftsResponse = await axios.get(
+        `${BACKEND_URL}/nfts/findByWallet?userWallet=${walletAddress}`
+      );
+
+      const data = nftsResponse.data as NFTGallery[];
+
+      setUserNFTs(data);
+    };
+
+    fetchUserNFTs();
+  }, [isConfirmed, isConfirming]);
 
   const mintNFT = async () => {
     // step 1
-    // generate and check id
-
     if (checkId) {
       setGenerateId(Math.floor(Math.random() * 100000) + 1);
     }
 
     // step 2
-    // call backend api
-    await axios
-      .post(
-        `${BACKEND_URL}/nfts`,
-        {
-          nftName: name,
-          nftDescription: description,
-          nftLogoUrl: imageUrl,
-          nftId: generatedId,
-          userWallet: walletAddress,
-        },
-        {
-          headers: {
-            "Content-Type": "application/json",
+    try {
+      await axios
+        .post(
+          `${BACKEND_URL}/nfts`,
+          {
+            nftName: name,
+            nftDescription: description,
+            nftLogoUrl: imageUrl,
+            nftId: generatedId,
+            userWallet: walletAddress,
           },
-        }
-      )
-      .then((response) => {
-        console.log({ response });
-      })
-      .catch((error) => {
-        // show error toast
-        console.log({ error });
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        )
+        .then((response) => {
+          // console.log({ response });
+        })
+        .catch((error) => {
+          // show error toast
+          // console.log({ error });
+        });
+
+      const metadataUrl = `${BACKEND_URL}/nfts/${generatedId}`;
+
+      // step 3
+      writeContract({
+        address: nftMintingContract.address,
+        abi: nftMintingContract.abi,
+        functionName: "mint",
+        args: [BigInt(generatedId), metadataUrl],
       });
-
-    const metadataUrl = `${BACKEND_URL}/nfts/${generatedId}`;
-
-    // step 3
-    // mint the nft
-    // submit uid, and url (get url by id from task 1)
-
-    writeContract({
-      address: nftMintingContract.address,
-      abi: nftMintingContract.abi,
-      functionName: "mint",
-      args: [BigInt(generatedId), metadataUrl],
-    });
+    } catch (error: any) {
+      setTryCatchError(error);
+    }
   };
 
   return (

@@ -1,124 +1,17 @@
-import {
-  getContractConfig,
-  NFT_CONTRACT_ADDRESS,
-} from "@/modules/blockchain/index.blockchain";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
-import {
-  type BaseError,
-  useAccount,
-  useReadContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
-import NFT_ABI from "@/utils/abi/NFT_ABI.json";
-import { useEffect, useState } from "react";
-import axios from "axios";
+import { useState } from "react";
 import { Play, Wallet } from "lucide-react";
-import { BACKEND_URL } from "@/utils/config/index.config";
 import Head from "next/head";
 import { motion } from "framer-motion";
 import NFTForm from "@/modules/components/NFTForm";
 import NFTGallery from "@/modules/components/NFTGallery";
 
 export default function Home() {
-  // const [name, setName] = useState("Cool NFT Image");
-  // const [description, setDescription] = useState("Cool NFT Image for Cytric");
-  // const [imageUrl, setImageUrl] = useState(
-  //   "https://images.app.goo.gl/98dgUoyEywAhPk7X7"
-  // );
-
   const [mintedNFT, setMintedNFT] = useState<{
     name: string;
     description: string;
     imageUrl: string;
   } | null>(null);
-
-  const [tryCatchError, setTryCatchError] = useState("");
-
-  const [generatedId, setGenerateId] = useState<number>(
-    Math.floor(Math.random() * 100000) + 1
-  );
-
-  const account = useAccount();
-  const walletAddress = account.address;
-
-  const nftMintingContract = getContractConfig(NFT_CONTRACT_ADDRESS, NFT_ABI);
-
-  const {
-    data: hash,
-    isPending,
-    writeContract,
-    error: mintError,
-  } = useWriteContract();
-
-  const { isLoading: isConfirming, isSuccess: isConfirmed } =
-    useWaitForTransactionReceipt({
-      hash,
-    });
-
-  const {
-    data: checkId,
-    error,
-    refetch,
-  } = useReadContract({
-    address: nftMintingContract.address,
-    abi: nftMintingContract.abi,
-    functionName: "checkId",
-    args: [generatedId],
-  });
-
-  useEffect(() => {
-    refetch();
-  }, [generatedId]);
-
-  const mintNFT = async () => {
-    // step 1
-    if (checkId) {
-      setGenerateId(Math.floor(Math.random() * 100000) + 1);
-    }
-
-    if (!mintedNFT?.name || !mintedNFT.description || !mintedNFT.imageUrl)
-      return;
-
-    // step 2
-    try {
-      await axios
-        .post(
-          `${BACKEND_URL}/nfts`,
-          {
-            nftName: mintedNFT.name,
-            nftDescription: mintedNFT.description,
-            nftLogoUrl: mintedNFT.imageUrl,
-            nftId: generatedId,
-            userWallet: walletAddress,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        )
-        .then((response) => {
-          // console.log({ response });
-        })
-        .catch((error) => {
-          // show error toast
-          // console.log({ error });
-        });
-
-      const metadataUrl = `${BACKEND_URL}/nfts/${generatedId}`;
-
-      // step 3
-      writeContract({
-        address: nftMintingContract.address,
-        abi: nftMintingContract.abi,
-        functionName: "mint",
-        args: [BigInt(generatedId), metadataUrl],
-      });
-    } catch (error: any) {
-      setTryCatchError(error);
-    }
-  };
 
   return (
     <>
@@ -145,13 +38,14 @@ export default function Home() {
                 Extraordinary NFTs
               </h1>
               <p className="text-gray-400 text-lg mb-8 max-w-2xl mx-auto">
-                Enter the world of digital art and collectibles. Explore unique NFTs created by artists worldwide.
+                Enter the world of digital art and collectibles. Explore unique
+                NFTs created by artists worldwide.
               </p>
               <div className="flex justify-center gap-4">
-                <button 
+                <button
                   onClick={() => {
-                    const formElement = document.getElementById('mint-form');
-                    formElement?.scrollIntoView({ behavior: 'smooth' });
+                    const formElement = document.getElementById("mint-form");
+                    formElement?.scrollIntoView({ behavior: "smooth" });
                   }}
                   className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-xl flex items-center gap-2 hover:opacity-90 transition-opacity"
                 >

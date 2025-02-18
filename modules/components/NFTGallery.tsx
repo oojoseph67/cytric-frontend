@@ -45,8 +45,6 @@ export default function NFTGallery() {
     return () => clearInterval(interval);
   }, [walletAddress]);
 
-  console.log({ userNFTs });
-
   return (
     <div>
       <h2 className="text-2xl font-bold mb-8">Your NFT Gallery</h2>

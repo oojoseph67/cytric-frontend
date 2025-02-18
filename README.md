@@ -30,7 +30,12 @@ A full-stack NFT minting application that allows users to create and manage NFTs
 
 - [Frontend Repository](https://github.com/oojoseph67/cytric-frontend)
 - [Backend Repository](https://github.com/oojoseph67/cytric-backend)
-- [Video Demo](your-loom-video-link) <!-- Add your Loom video link here -->
+
+## Demo Videos
+- [Video Collection Folder](https://drive.google.com/file/d/1b1MPVDVvQ0xeJTZngPC_ZP7H5yzvGiXn/view?usp=drive_link) - Access all demo videos
+    - [Complete Application Demo](https://drive.google.com/file/d/1KkCLgcyvd6ZAvC9fKG8bCVcnxDSLeqeW/view?usp=sharing) - Watch the full application in action
+    - [Backend Development Walkthrough](https://drive.google.com/file/d/1b1MPVDVvQ0xeJTZngPC_ZP7H5yzvGiXn/view?usp=sharing) - Technical overview of the backend implementation
+    - [Frontend Development Walkthrough](https://drive.google.com/file/d/17GBu1Kn7FNBjYNjHis8MgYoYmhDL8xxw/view?usp=drive_link) - Technical overview of the frontend implementation
 
 ## Getting Started
 
